@@ -29,7 +29,7 @@ interface Resource {
   id: string;
   title: string;
   subject: string;
-  type: 'pdf' | 'video';
+  type: 'pdf' | 'video' | 'archivo';
   url: string;
   created_at: string;
 }
@@ -61,7 +61,7 @@ export default function DashboardPage() {
   // Upload form state
   const [title, setTitle] = useState('');
   const [subject, setSubject] = useState('');
-  const [type, setType] = useState<'pdf' | 'video'>('pdf');
+  const [type, setType] = useState<'pdf' | 'video' | 'archivo'>('archivo');
   const [file, setFile] = useState<File | null>(null);
   const [videoUrl, setVideoUrl] = useState('');
   const [uploading, setUploading] = useState(false);
@@ -181,10 +181,10 @@ export default function DashboardPage() {
     try {
       let resourceUrl = videoUrl;
 
-      if (type === 'pdf') {
+      if (type === 'pdf' || type === 'archivo') {
         if (!file) {
           setUploadStatus('error');
-          setUploadMessage('Seleccioná un archivo PDF.');
+          setUploadMessage('Seleccioná un archivo.');
           setUploading(false);
           return;
         }
@@ -192,7 +192,7 @@ export default function DashboardPage() {
         const fileName = `${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
         const { error: uploadError } = await supabase.storage
           .from('materiales')
-          .upload(fileName, file, { contentType: 'application/pdf', upsert: false });
+          .upload(fileName, file, { contentType: file.type || 'application/octet-stream', upsert: false });
 
         if (uploadError) throw new Error(uploadError.message);
 
@@ -243,8 +243,8 @@ export default function DashboardPage() {
     setDeletingId(resource.id);
 
     try {
-      // If PDF, delete from storage too
-      if (resource.type === 'pdf') {
+      // If file, delete from storage too
+      if (resource.type === 'pdf' || resource.type === 'archivo') {
         const parts = resource.url.split('/materiales/');
         if (parts[1]) {
           await supabase.storage.from('materiales').remove([parts[1]]);
@@ -378,7 +378,7 @@ export default function DashboardPage() {
             <h1 className="text-2xl font-bold text-white mb-1" style={{ fontFamily: 'Playfair Display, serif' }}>
               Subir Material
             </h1>
-            <p className="text-slate-500 text-sm mb-8">Cargá PDFs o links de video para los estudiantes.</p>
+            <p className="text-slate-500 text-sm mb-8">Cargá documentos o links de video para los estudiantes.</p>
 
             <form onSubmit={handleUpload} className="glass rounded-2xl p-8 border border-white/5 space-y-6">
               {/* Title */}
@@ -425,7 +425,7 @@ export default function DashboardPage() {
                   Tipo de recurso *
                 </label>
                 <div className="flex gap-3">
-                  {(['pdf', 'video'] as const).map((t) => (
+                  {(['archivo', 'video'] as const).map((t) => (
                     <button
                       key={t}
                       type="button"
@@ -440,24 +440,24 @@ export default function DashboardPage() {
                           : 'glass text-slate-400 border-white/10 hover:border-white/20'
                       }`}
                     >
-                      {t === 'pdf' ? <FileText className="w-4 h-4" /> : <Video className="w-4 h-4" />}
-                      {t.toUpperCase()}
+                      {t === 'archivo' ? <FileText className="w-4 h-4" /> : <Video className="w-4 h-4" />}
+                      {t === 'archivo' ? 'DOCUMENTO' : t.toUpperCase()}
                     </button>
                   ))}
                 </div>
               </div>
 
               {/* Conditional: PDF file vs Video URL */}
-              {type === 'pdf' ? (
+              {type === 'archivo' || type === 'pdf' ? (
                 <div>
                   <label className="block text-slate-400 text-xs mb-2 font-medium uppercase tracking-wide">
-                    Archivo PDF *
+                    Archivo *
                   </label>
                   <div className="relative">
                     <input
                       id="file-input"
                       type="file"
-                      accept=".pdf,application/pdf"
+                      accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.zip"
                       onChange={(e) => setFile(e.target.files?.[0] || null)}
                       className="block w-full text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-gold file:text-navy hover:file:bg-gold-light file:transition-colors file:cursor-pointer cursor-pointer input-dark"
                     />
@@ -664,7 +664,7 @@ export default function DashboardPage() {
                     className="glass rounded-xl px-6 py-4 border border-white/5 flex items-center gap-4"
                   >
                     <div className="w-9 h-9 rounded-lg glass-gold flex items-center justify-center flex-shrink-0">
-                      {resource.type === 'pdf' ? (
+                      {resource.type !== 'video' ? (
                         <FileText className="w-4 h-4 text-gold" />
                       ) : (
                         <Video className="w-4 h-4 text-gold" />
@@ -675,11 +675,11 @@ export default function DashboardPage() {
                       <p className="text-slate-500 text-xs truncate">{resource.subject}</p>
                     </div>
                     <span className={`text-xs px-2.5 py-0.5 rounded-full border flex-shrink-0 ${
-                      resource.type === 'pdf'
+                      (resource.type === 'pdf' || resource.type === 'archivo')
                         ? 'bg-red-500/10 text-red-400 border-red-500/20'
                         : 'bg-blue-500/10 text-blue-400 border-blue-500/20'
                     }`}>
-                      {resource.type.toUpperCase()}
+                      {resource.type === 'archivo' ? 'DOC' : resource.type.toUpperCase()}
                     </span>
                     <span className="text-slate-600 text-xs flex-shrink-0 hidden md:block">
                       {new Date(resource.created_at).toLocaleDateString('es-AR')}

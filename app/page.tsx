@@ -17,7 +17,7 @@ interface Resource {
   id: string;
   title: string;
   subject: string;
-  type: 'pdf' | 'video';
+  type: 'pdf' | 'video' | 'archivo';
   url: string;
   created_at: string;
 }
@@ -401,7 +401,7 @@ export default function HomePage() {
       {selectedSubject && (() => {
         const subjectResources = resources.filter(r => r.subject === selectedSubject.title);
         const subjectTests     = tests.filter(t => t.subject === selectedSubject.title);
-        const pdfs   = subjectResources.filter(r => r.type === 'pdf');
+        const files  = subjectResources.filter(r => r.type === 'pdf' || r.type === 'archivo');
         const videos = subjectResources.filter(r => r.type === 'video');
         const Icon   = selectedSubject.icon;
         return (
@@ -487,13 +487,13 @@ export default function HomePage() {
                     </div>
                   ) : (
                     <>
-                      {pdfs.length > 0 && (
+                      {files.length > 0 && (
                         <div>
                           <h3 className="text-xs font-semibold text-gold uppercase tracking-widest mb-3 flex items-center gap-2">
-                            <FileText className="w-3.5 h-3.5" /> PDFs y Apuntes
+                            <FileText className="w-3.5 h-3.5" /> Documentos y Apuntes
                           </h3>
                           <div className="space-y-2">
-                            {pdfs.map(r => (
+                            {files.map(r => (
                               <div key={r.id} className="flex items-center justify-between gap-4 glass rounded-xl px-4 py-3">
                                 <div className="flex items-center gap-3 min-w-0">
                                   <FileText className="w-4 h-4 text-red-400 flex-shrink-0" />
@@ -782,23 +782,23 @@ export default function HomePage() {
                 <div key={resource.id} className="glass card-hover rounded-xl p-6 border border-white/5 flex flex-col gap-4">
                   <div className="flex items-center justify-between">
                     <div className="w-10 h-10 rounded-lg glass-gold flex items-center justify-center">
-                      {resource.type === 'pdf' ? <FileText size={24} className="text-gold" /> : <PlayCircle size={24} className="text-gold" />}
+                      {resource.type !== 'video' ? <FileText size={24} className="text-gold" /> : <PlayCircle size={24} className="text-gold" />}
                     </div>
                     <span className={`text-xs font-medium px-2.5 py-1 rounded-full border ${
-                      resource.type === 'pdf'
+                      resource.type !== 'video'
                         ? 'bg-red-500/10 text-red-400 border-red-500/20'
                         : 'bg-blue-500/10 text-blue-400 border-blue-500/20'
                     }`}>
-                      {String(resource.type).toUpperCase()}
+                      {resource.type === 'archivo' ? 'DOC' : String(resource.type).toUpperCase()}
                     </span>
                   </div>
                   <div className="flex-1">
                     <h3 className="text-white font-semibold text-sm mb-1 leading-snug">{String(resource.title)}</h3>
                     <p className="text-slate-500 text-xs">{String(resource.subject)}</p>
                   </div>
-                  {resource.type === 'pdf' ? (
+                  {resource.type !== 'video' ? (
                     <a href={resource.url} download target="_blank" rel="noopener noreferrer" className="btn-gold w-full justify-center text-xs py-2.5">
-                      <Download className="w-4 h-4" /> Descargar PDF
+                      <Download className="w-4 h-4" /> Descargar
                     </a>
                   ) : (
                     <a href={resource.url} target="_blank" rel="noopener noreferrer" className="btn-outline-gold w-full justify-center text-xs py-2.5">
