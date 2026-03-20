@@ -189,7 +189,12 @@ export default function DashboardPage() {
           return;
         }
 
-        const fileName = `${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
+        const sanitizedName = file.name
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .replace(/\s+/g, '_')
+          .replace(/[^a-zA-Z0-9._-]/g, '');
+        const fileName = `${Date.now()}_${sanitizedName}`;
         const { error: uploadError } = await supabase.storage
           .from('materiales')
           .upload(fileName, file, { contentType: file.type || 'application/octet-stream', upsert: false });
