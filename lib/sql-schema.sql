@@ -151,10 +151,14 @@ on conflict do nothing;
 create table if not exists public.tests (
   id          uuid primary key default gen_random_uuid(),
   name        text not null,
-  link        text not null,
+  link        text not null default '',
   subject     text not null,
+  is_internal boolean not null default false,
   created_at  timestamptz default now()
 );
+
+-- Migration: add is_internal to existing tables (safe to run multiple times)
+alter table public.tests add column if not exists is_internal boolean not null default false;
 
 alter table public.tests enable row level security;
 

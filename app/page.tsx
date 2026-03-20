@@ -9,6 +9,7 @@ import {
   Users, AlertTriangle, MessageCircle, ClipboardList,
 } from 'lucide-react';
 import WhatsAppFAB from '@/components/WhatsAppFAB';
+import QuizComponent from '@/components/QuizComponent';
 import { supabase } from '@/lib/supabaseClient';
 
 // ── Types ──────────────────────────────────────────────
@@ -59,6 +60,7 @@ interface Test {
   name: string;
   link: string;
   subject: string;
+  is_internal: boolean;
   created_at: string;
 }
 
@@ -540,24 +542,46 @@ export default function HomePage() {
                       <p className="text-slate-500 text-sm">¡Mati los subirá pronto! 📋</p>
                     </div>
                   ) : (
-                    <div className="space-y-3">
+                    <div className="space-y-4">
                       {subjectTests.map(test => (
-                        <a
-                          key={test.id}
-                          href={test.link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-4 glass card-hover rounded-xl px-5 py-4 border border-white/5 group"
-                        >
-                          <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center flex-shrink-0 group-hover:bg-purple-500/20 transition-all">
-                            <ClipboardList className="w-5 h-5 text-purple-400" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-white text-sm font-semibold">{test.name}</p>
-                            <p className="text-slate-500 text-xs mt-0.5 truncate">{test.link}</p>
-                          </div>
-                          <ExternalLink className="w-4 h-4 text-slate-600 group-hover:text-purple-400 transition-colors flex-shrink-0" />
-                        </a>
+                        <div key={test.id}>
+                          {test.is_internal ? (
+                            /* ── Internal Quiz Card ── */
+                            <div className="glass rounded-2xl border border-purple-500/20 overflow-hidden">
+                              {/* Quiz header */}
+                              <div className="flex items-center gap-4 px-5 py-4 bg-purple-500/5 border-b border-purple-500/10">
+                                <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center flex-shrink-0">
+                                  <ClipboardList className="w-5 h-5 text-purple-400" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-white text-sm font-bold">{test.name}</p>
+                                  <span className="text-xs text-purple-400 font-medium">🧠 Quiz Interactivo · 20 preguntas</span>
+                                </div>
+                              </div>
+                              {/* Render quiz inline */}
+                              <div className="p-5">
+                                <QuizComponent quizName={test.name} />
+                              </div>
+                            </div>
+                          ) : (
+                            /* ── External Link Card ── */
+                            <a
+                              href={test.link}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center gap-4 glass card-hover rounded-xl px-5 py-4 border border-white/5 group"
+                            >
+                              <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center flex-shrink-0 group-hover:bg-purple-500/20 transition-all">
+                                <ClipboardList className="w-5 h-5 text-purple-400" />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-white text-sm font-semibold">{test.name}</p>
+                                <p className="text-slate-500 text-xs mt-0.5 truncate">{test.link}</p>
+                              </div>
+                              <ExternalLink className="w-4 h-4 text-slate-600 group-hover:text-purple-400 transition-colors flex-shrink-0" />
+                            </a>
+                          )}
+                        </div>
                       ))}
                     </div>
                   )

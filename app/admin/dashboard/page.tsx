@@ -39,6 +39,7 @@ interface Test {
   name: string;
   link: string;
   subject: string;
+  is_internal: boolean;
   created_at: string;
 }
 
@@ -85,6 +86,7 @@ export default function DashboardPage() {
   const [testName, setTestName]         = useState('');
   const [testLink, setTestLink]         = useState('');
   const [testSubject, setTestSubject]   = useState('');
+  const [isInternal, setIsInternal]     = useState(false);
   const [savingTest, setSavingTest]     = useState(false);
   const [testStatus, setTestStatus]     = useState<'idle' | 'success' | 'error'>('idle');
   const [testMessage, setTestMessage]   = useState('');
@@ -259,17 +261,23 @@ export default function DashboardPage() {
   // ── Save test ──────────────────────────────────────
   const handleSaveTest = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!testName.trim() || !testLink.trim() || !testSubject) {
+    if (!testName.trim() || !testSubject) {
       setTestStatus('error');
-      setTestMessage('Completá todos los campos.');
+      setTestMessage('Completá el nombre y la materia.');
+      return;
+    }
+    if (!isInternal && !testLink.trim()) {
+      setTestStatus('error');
+      setTestMessage('Ingresá el link del test externo.');
       return;
     }
     setSavingTest(true);
     setTestStatus('idle');
     const { error } = await supabase.from('tests').insert({
       name: testName.trim(),
-      link: testLink.trim(),
+      link: isInternal ? '' : testLink.trim(),
       subject: testSubject,
+      is_internal: isInternal,
     });
     if (error) {
       setTestStatus('error');
@@ -280,6 +288,7 @@ export default function DashboardPage() {
       setTestName('');
       setTestLink('');
       setTestSubject('');
+      setIsInternal(false);
       fetchTests();
     }
     setSavingTest(false);
@@ -744,20 +753,57 @@ export default function DashboardPage() {
                 </div>
               </div>
 
-              {/* Link */}
+              {/* Type toggle: Internal quiz vs External link */}
               <div>
                 <label className="block text-slate-400 text-xs mb-2 font-medium uppercase tracking-wide">
-                  Link del Test (URL) *
+                  Tipo de Simulacro
                 </label>
-                <input
-                  type="url"
-                  value={testLink}
-                  onChange={e => setTestLink(e.target.value)}
-                  placeholder="https://www.daypo.com/tu-test.html"
-                  className="input-dark"
-                  required
-                />
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsInternal(false)}
+                    className={`flex-1 px-4 py-2.5 rounded-xl text-sm font-semibold border transition-all ${
+                      !isInternal
+                        ? 'bg-gold/10 border-gold/40 text-gold'
+                        : 'border-white/5 text-slate-500 hover:text-slate-300'
+                    }`}
+                  >
+                    🔗 Link externo (Daypo)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsInternal(true)}
+                    className={`flex-1 px-4 py-2.5 rounded-xl text-sm font-semibold border transition-all ${
+                      isInternal
+                        ? 'bg-purple-500/10 border-purple-500/40 text-purple-400'
+                        : 'border-white/5 text-slate-500 hover:text-slate-300'
+                    }`}
+                  >
+                    🧠 Quiz interno (20 preguntas)
+                  </button>
+                </div>
+                {isInternal && (
+                  <p className="text-xs text-purple-400/70 mt-2">
+                    Se mostrará el quiz interactivo con 20 preguntas mezcladas automáticamente.
+                  </p>
+                )}
               </div>
+
+              {/* Link (only for external) */}
+              {!isInternal && (
+                <div>
+                  <label className="block text-slate-400 text-xs mb-2 font-medium uppercase tracking-wide">
+                    Link del Test (URL) *
+                  </label>
+                  <input
+                    type="url"
+                    value={testLink}
+                    onChange={e => setTestLink(e.target.value)}
+                    placeholder="https://www.daypo.com/tu-test.html"
+                    className="input-dark"
+                  />
+                </div>
+              )}
 
               {/* Status */}
               {testStatus !== 'idle' && (
