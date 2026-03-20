@@ -17,7 +17,7 @@ interface Resource {
   id: string;
   title: string;
   subject: string;
-  type: 'pdf' | 'video' | 'archivo';
+  type: 'pdf' | 'video';
   url: string;
   created_at: string;
 }
@@ -401,7 +401,7 @@ export default function HomePage() {
       {selectedSubject && (() => {
         const subjectResources = resources.filter(r => r.subject === selectedSubject.title);
         const subjectTests     = tests.filter(t => t.subject === selectedSubject.title);
-        const files  = subjectResources.filter(r => r.type === 'pdf' || r.type === 'archivo');
+        const files  = subjectResources.filter(r => r.type === 'pdf');
         const videos = subjectResources.filter(r => r.type === 'video');
         const Icon   = selectedSubject.icon;
         return (
@@ -782,21 +782,21 @@ export default function HomePage() {
                 <div key={resource.id} className="glass card-hover rounded-xl p-6 border border-white/5 flex flex-col gap-4">
                   <div className="flex items-center justify-between">
                     <div className="w-10 h-10 rounded-lg glass-gold flex items-center justify-center">
-                      {resource.type !== 'video' ? <FileText size={24} className="text-gold" /> : <PlayCircle size={24} className="text-gold" />}
+                      {resource.type === 'pdf' ? <FileText size={24} className="text-gold" /> : <PlayCircle size={24} className="text-gold" />}
                     </div>
                     <span className={`text-xs font-medium px-2.5 py-1 rounded-full border ${
-                      resource.type !== 'video'
+                      resource.type === 'pdf'
                         ? 'bg-red-500/10 text-red-400 border-red-500/20'
                         : 'bg-blue-500/10 text-blue-400 border-blue-500/20'
                     }`}>
-                      {resource.type === 'archivo' ? 'DOC' : String(resource.type).toUpperCase()}
+                      {resource.type === 'pdf' ? 'DOC' : String(resource.type).toUpperCase()}
                     </span>
                   </div>
                   <div className="flex-1">
                     <h3 className="text-white font-semibold text-sm mb-1 leading-snug">{String(resource.title)}</h3>
                     <p className="text-slate-500 text-xs">{String(resource.subject)}</p>
                   </div>
-                  {resource.type !== 'video' ? (
+                  {resource.type === 'pdf' ? (
                     <a href={resource.url} download target="_blank" rel="noopener noreferrer" className="btn-gold w-full justify-center text-xs py-2.5">
                       <Download className="w-4 h-4" /> Descargar
                     </a>

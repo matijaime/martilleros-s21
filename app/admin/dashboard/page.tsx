@@ -61,7 +61,7 @@ export default function DashboardPage() {
   // Upload form state
   const [title, setTitle] = useState('');
   const [subject, setSubject] = useState('');
-  const [type, setType] = useState<'pdf' | 'video' | 'archivo'>('archivo');
+  const [type, setType] = useState<'pdf' | 'video'>('pdf');
   const [file, setFile] = useState<File | null>(null);
   const [videoUrl, setVideoUrl] = useState('');
   const [uploading, setUploading] = useState(false);
@@ -181,7 +181,7 @@ export default function DashboardPage() {
     try {
       let resourceUrl = videoUrl;
 
-      if (type === 'pdf' || type === 'archivo') {
+      if (type === 'pdf') {
         if (!file) {
           setUploadStatus('error');
           setUploadMessage('Seleccioná un archivo.');
@@ -249,7 +249,7 @@ export default function DashboardPage() {
 
     try {
       // If file, delete from storage too
-      if (resource.type === 'pdf' || resource.type === 'archivo') {
+      if (resource.type !== 'video') {
         const parts = resource.url.split('/materiales/');
         if (parts[1]) {
           await supabase.storage.from('materiales').remove([parts[1]]);
@@ -430,7 +430,7 @@ export default function DashboardPage() {
                   Tipo de recurso *
                 </label>
                 <div className="flex gap-3">
-                  {(['archivo', 'video'] as const).map((t) => (
+                  {(['pdf', 'video'] as const).map((t) => (
                     <button
                       key={t}
                       type="button"
@@ -445,15 +445,15 @@ export default function DashboardPage() {
                           : 'glass text-slate-400 border-white/10 hover:border-white/20'
                       }`}
                     >
-                      {t === 'archivo' ? <FileText className="w-4 h-4" /> : <Video className="w-4 h-4" />}
-                      {t === 'archivo' ? 'DOCUMENTO' : t.toUpperCase()}
+                      {t === 'pdf' ? <FileText className="w-4 h-4" /> : <Video className="w-4 h-4" />}
+                      {t === 'pdf' ? 'DOCUMENTO' : t.toUpperCase()}
                     </button>
                   ))}
                 </div>
               </div>
 
               {/* Conditional: PDF file vs Video URL */}
-              {type === 'archivo' || type === 'pdf' ? (
+              {type === 'pdf' ? (
                 <div>
                   <label className="block text-slate-400 text-xs mb-2 font-medium uppercase tracking-wide">
                     Archivo *
@@ -680,11 +680,11 @@ export default function DashboardPage() {
                       <p className="text-slate-500 text-xs truncate">{resource.subject}</p>
                     </div>
                     <span className={`text-xs px-2.5 py-0.5 rounded-full border flex-shrink-0 ${
-                      (resource.type === 'pdf' || resource.type === 'archivo')
+                      resource.type !== 'video'
                         ? 'bg-red-500/10 text-red-400 border-red-500/20'
                         : 'bg-blue-500/10 text-blue-400 border-blue-500/20'
                     }`}>
-                      {resource.type === 'archivo' ? 'DOC' : resource.type.toUpperCase()}
+                      {resource.type !== 'video' ? 'DOC' : resource.type.toUpperCase()}
                     </span>
                     <span className="text-slate-600 text-xs flex-shrink-0 hidden md:block">
                       {new Date(resource.created_at).toLocaleDateString('es-AR')}
