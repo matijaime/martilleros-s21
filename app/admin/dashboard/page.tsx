@@ -22,6 +22,9 @@ import {
   ClipboardList,
   ExternalLink,
   PlusCircle,
+  Images,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 
 // ── Types ──────────────────────────────────────────────
@@ -51,7 +54,9 @@ const SUBJECTS = [
   'TECNOLOGÍA, HUMANIDADES Y MODELOS GLOBALES',
 ];
 
-type ActiveSection = 'upload' | 'list' | 'alerts' | 'tests';
+type ActiveSection = 'upload' | 'list' | 'alerts' | 'tests' | 'galeria';
+
+const TOTAL_IMAGES = 43;
 
 // ── Dashboard Page ─────────────────────────────────────
 export default function DashboardPage() {
@@ -91,6 +96,9 @@ export default function DashboardPage() {
   const [testStatus, setTestStatus]     = useState<'idle' | 'success' | 'error'>('idle');
   const [testMessage, setTestMessage]   = useState('');
   const [deletingTestId, setDeletingTestId] = useState<string | null>(null);
+
+  // Gallery state
+  const [galleryIndex, setGalleryIndex] = useState(0);
 
   // ── Fetch resources ────────────────────────────────
   const fetchResources = useCallback(async () => {
@@ -298,6 +306,29 @@ export default function DashboardPage() {
     }
     setSavingTest(false);
   };
+
+  // ── Gallery navigation helpers ─────────────────────────────────
+  const goPrev = () => setGalleryIndex(i => (i - 1 + TOTAL_IMAGES) % TOTAL_IMAGES);
+  const goNext = () => setGalleryIndex(i => (i + 1) % TOTAL_IMAGES);
+
+  useEffect(() => {
+    if (activeSection !== 'galeria') return;
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft') setGalleryIndex(i => (i - 1 + TOTAL_IMAGES) % TOTAL_IMAGES);
+      if (e.key === 'ArrowRight') setGalleryIndex(i => (i + 1) % TOTAL_IMAGES);
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [activeSection]);
+
+  // ── Sidebar items ──────────────────────────────────────────────
+  const navItems = [
+    { id: 'upload'  as ActiveSection, label: 'Subir Material',        icon: Upload },
+    { id: 'list'    as ActiveSection, label: 'Ver Recursos',           icon: List },
+    { id: 'tests'   as ActiveSection, label: 'Gestionar Tests',        icon: ClipboardList },
+    { id: 'alerts'  as ActiveSection, label: 'Alerta de Emergencia',   icon: Bell },
+    { id: 'galeria' as ActiveSection, label: 'Galería de Imágenes',    icon: Images },
+  ];
 
   // ── Delete test ────────────────────────────────────
   const handleDeleteTest = async (id: string) => {
@@ -880,6 +911,86 @@ export default function DashboardPage() {
                   ))}
                 </div>
               )}
+            </div>
+          </div>
+        )}
+
+        {/* ── GALLERY SECTION ─── */}
+        {activeSection === 'galeria' && (
+          <div className="max-w-4xl mx-auto">
+            <div className="flex items-center gap-3 mb-1">
+              <Images className="w-6 h-6 text-gold" />
+              <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+                Galería de Imágenes
+              </h1>
+            </div>
+            <p className="text-slate-500 text-sm mb-8">
+              {TOTAL_IMAGES} imágenes · Usá las flechas o las teclas ← → para navegar.
+            </p>
+
+            {/* Main viewer */}
+            <div className="glass rounded-2xl border border-white/5 overflow-hidden">
+              {/* Image display */}
+              <div className="relative bg-black/40 flex items-center justify-center" style={{ minHeight: '480px' }}>
+                <img
+                  key={galleryIndex}
+                  src={`/galeria/${galleryIndex + 1}.jpeg`}
+                  alt={`Imagen ${galleryIndex + 1} de ${TOTAL_IMAGES}`}
+                  className="max-h-[480px] max-w-full object-contain"
+                  style={{ display: 'block' }}
+                />
+
+                {/* Prev button */}
+                <button
+                  id="gallery-prev"
+                  onClick={goPrev}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full glass border border-white/10 flex items-center justify-center text-white hover:bg-white/10 transition-all"
+                  aria-label="Imagen anterior"
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
+
+                {/* Next button */}
+                <button
+                  id="gallery-next"
+                  onClick={goNext}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full glass border border-white/10 flex items-center justify-center text-white hover:bg-white/10 transition-all"
+                  aria-label="Siguiente imagen"
+                >
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+
+                {/* Counter badge */}
+                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-black/60 text-white text-xs font-medium">
+                  {galleryIndex + 1} / {TOTAL_IMAGES}
+                </div>
+              </div>
+
+              {/* Thumbnail strip */}
+              <div className="p-4 border-t border-white/5 overflow-x-auto">
+                <div className="flex gap-2" style={{ minWidth: 'max-content' }}>
+                  {Array.from({ length: TOTAL_IMAGES }, (_, i) => (
+                    <button
+                      key={i}
+                      id={`thumb-${i + 1}`}
+                      onClick={() => setGalleryIndex(i)}
+                      className={`flex-shrink-0 w-14 h-14 rounded-lg overflow-hidden border-2 transition-all ${
+                        galleryIndex === i
+                          ? 'border-gold scale-105 shadow-lg shadow-gold/20'
+                          : 'border-white/10 hover:border-white/30 opacity-60 hover:opacity-100'
+                      }`}
+                      title={`Imagen ${i + 1}`}
+                    >
+                      <img
+                        src={`/galeria/${i + 1}.jpeg`}
+                        alt={`Miniatura ${i + 1}`}
+                        className="w-full h-full object-cover"
+                        loading="lazy"
+                      />
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         )}
