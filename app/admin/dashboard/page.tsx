@@ -345,13 +345,6 @@ export default function DashboardPage() {
     router.push('/admin');
   };
 
-  // ── Sidebar items ──────────────────────────────────
-  const navItems = [
-    { id: 'upload' as ActiveSection, label: 'Subir Material',        icon: Upload },
-    { id: 'list'   as ActiveSection, label: 'Ver Recursos',           icon: List },
-    { id: 'tests'  as ActiveSection, label: 'Gestionar Tests',        icon: ClipboardList },
-    { id: 'alerts' as ActiveSection, label: 'Alerta de Emergencia',   icon: Bell },
-  ];
 
   return (
     <div className="min-h-screen flex">
