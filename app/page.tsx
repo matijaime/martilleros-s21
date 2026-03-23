@@ -18,7 +18,7 @@ interface Resource {
   id: string;
   title: string;
   subject: string;
-  type: 'pdf' | 'video';
+  type: 'pdf' | 'video' | 'galeria';
   url: string;
   created_at: string;
 }
@@ -253,6 +253,14 @@ export default function HomePage() {
     })();
   }, []);
 
+  // ── Public Gallery Open from Hash ─────────────────────
+  useEffect(() => {
+    if (window.location.hash === '#filminas') {
+      setGalleryIndex(0);
+      setGalleryOpen(true);
+    }
+  }, []);
+
   // ── Public Gallery Keyboard Navigation ────────────────
   useEffect(() => {
     if (!galleryOpen) return;
@@ -280,10 +288,21 @@ export default function HomePage() {
     })();
   }, []);
 
-  const filtered = resources?.filter(r =>
+  const hardcodedGalleryResource: Resource = {
+    id: 'filminas-civil',
+    title: 'Filminas de las clases de derecho',
+    subject: 'DERECHO PRIVADO CIVIL',
+    type: 'galeria',
+    url: '#filminas',
+    created_at: new Date().toISOString(),
+  };
+
+  const allResources = [hardcodedGalleryResource, ...(resources || [])];
+
+  const filtered = allResources.filter(r =>
     r?.title?.toLowerCase()?.includes(search?.toLowerCase()) ||
     r?.subject?.toLowerCase()?.includes(search?.toLowerCase())
-  ) || [];
+  );
 
   const formatDate = (iso: string) =>
     new Date(iso).toLocaleDateString('es-AR', { weekday: 'short', day: 'numeric', month: 'long' });
@@ -519,7 +538,11 @@ export default function HomePage() {
                                 <p className="text-white text-sm truncate">Filminas de las clases de derecho</p>
                               </div>
                               <button
-                                onClick={() => { setGalleryIndex(0); setGalleryOpen(true); }}
+                                onClick={() => { 
+                                  setGalleryIndex(0); 
+                                  setGalleryOpen(true);
+                                  window.location.hash = 'filminas';
+                                }}
                                 className="flex-shrink-0 flex items-center gap-1.5 bg-gold/10 hover:bg-gold/20 text-gold text-xs font-semibold px-3 py-1.5 rounded-lg transition-all border border-gold/20"
                               >
                                 <Images className="w-3.5 h-3.5" /> Ver Filminas
@@ -824,11 +847,13 @@ export default function HomePage() {
                 <div key={resource.id} className="glass card-hover rounded-xl p-6 border border-white/5 flex flex-col gap-4">
                   <div className="flex items-center justify-between">
                     <div className="w-10 h-10 rounded-lg glass-gold flex items-center justify-center">
-                      {resource.type === 'pdf' ? <FileText size={24} className="text-gold" /> : <PlayCircle size={24} className="text-gold" />}
+                      {resource.type === 'pdf' ? <FileText size={24} className="text-gold" /> : resource.type === 'galeria' ? <Images size={24} className="text-gold" /> : <PlayCircle size={24} className="text-gold" />}
                     </div>
                     <span className={`text-xs font-medium px-2.5 py-1 rounded-full border ${
                       resource.type === 'pdf'
                         ? 'bg-red-500/10 text-red-400 border-red-500/20'
+                        : resource.type === 'galeria'
+                        ? 'bg-gold/10 text-gold border-gold/20'
                         : 'bg-blue-500/10 text-blue-400 border-blue-500/20'
                     }`}>
                       {resource.type === 'pdf' ? 'DOC' : String(resource.type).toUpperCase()}
@@ -842,6 +867,17 @@ export default function HomePage() {
                     <a href={resource.url} download target="_blank" rel="noopener noreferrer" className="btn-gold w-full justify-center text-xs py-2.5">
                       <Download className="w-4 h-4" /> Descargar
                     </a>
+                  ) : resource.type === 'galeria' ? (
+                    <button 
+                      onClick={() => {
+                        setGalleryIndex(0);
+                        setGalleryOpen(true);
+                        window.location.hash = 'filminas';
+                      }}
+                      className="btn-gold w-full justify-center text-xs py-2.5"
+                    >
+                      <Images className="w-4 h-4" /> Ver Galería
+                    </button>
                   ) : (
                     <a href={resource.url} target="_blank" rel="noopener noreferrer" className="btn-outline-gold w-full justify-center text-xs py-2.5">
                       <ExternalLink className="w-4 h-4" /> Abrir Video
