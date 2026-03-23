@@ -25,6 +25,9 @@ import {
   Images,
   ChevronLeft,
   ChevronRight,
+  Edit2,
+  Check,
+  X,
 } from 'lucide-react';
 
 // ── Types ──────────────────────────────────────────────
@@ -77,6 +80,11 @@ export default function DashboardPage() {
   const [resources, setResources] = useState<Resource[]>([]);
   const [loadingResources, setLoadingResources] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  // Editing resource state
+  const [editingResourceId, setEditingResourceId] = useState<string | null>(null);
+  const [editingResourceTitle, setEditingResourceTitle] = useState('');
+  const [savingResourceTitle, setSavingResourceTitle] = useState<string | null>(null);
 
   // Alert state
   const [alertId, setAlertId] = useState<string | null>(null);
@@ -164,7 +172,11 @@ export default function DashboardPage() {
         setAlertId(data.id);
       }
       setAlertSaveStatus('success');
-    } catch {
+    } catch (err: any) {
+      console.error("DEBUG ALERT ERROR:", err);
+      if (err?.message) {
+        setAlertMsg(`ERROR: ${err.message}`);
+      }
       setAlertSaveStatus('error');
     } finally {
       setSavingAlert(false);
@@ -268,6 +280,34 @@ export default function DashboardPage() {
       setResources((prev) => prev.filter((r) => r.id !== resource.id));
     } finally {
       setDeletingId(null);
+    }
+  };
+
+  // ── Edit Resource handler ──────────────────────────
+  const handleEditResource = async (resource: Resource) => {
+    if (editingResourceTitle.trim() === '' || editingResourceTitle === resource.title) {
+      setEditingResourceId(null);
+      return;
+    }
+
+    setSavingResourceTitle(resource.id);
+    try {
+      const { error } = await supabase
+        .from('resources')
+        .update({ title: editingResourceTitle.trim() })
+        .eq('id', resource.id);
+
+      if (error) throw error;
+
+      setResources((prev) =>
+        prev.map((r) => (r.id === resource.id ? { ...r, title: editingResourceTitle.trim() } : r))
+      );
+      setEditingResourceId(null);
+    } catch (err) {
+      console.error('Error updating resource title:', err);
+      alert('Error guardando el nuevo nombre');
+    } finally {
+      setSavingResourceTitle(null);
     }
   };
 
@@ -690,7 +730,7 @@ export default function DashboardPage() {
                 {resources.map((resource) => (
                   <div
                     key={resource.id}
-                    className="glass rounded-xl px-6 py-4 border border-white/5 flex items-center gap-4"
+                    className="group glass rounded-xl px-6 py-4 border border-white/5 flex items-center gap-4"
                   >
                     <div className="w-9 h-9 rounded-lg glass-gold flex items-center justify-center flex-shrink-0">
                       {resource.type !== 'video' ? (
@@ -700,7 +740,49 @@ export default function DashboardPage() {
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-white text-sm font-medium truncate">{resource.title}</p>
+                      {editingResourceId === resource.id ? (
+                        <div className="flex items-center gap-2 mb-1">
+                          <input
+                            type="text"
+                            value={editingResourceTitle}
+                            onChange={(e) => setEditingResourceTitle(e.target.value)}
+                            className="input-dark text-sm py-1 px-2 h-auto w-full max-w-sm"
+                            autoFocus
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') handleEditResource(resource);
+                              if (e.key === 'Escape') setEditingResourceId(null);
+                            }}
+                          />
+                          <button
+                            onClick={() => handleEditResource(resource)}
+                            disabled={savingResourceTitle === resource.id}
+                            className="text-emerald-400 hover:bg-emerald-400/10 p-1.5 rounded transition-colors disabled:opacity-50"
+                          >
+                            {savingResourceTitle === resource.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+                          </button>
+                          <button
+                            onClick={() => setEditingResourceId(null)}
+                            disabled={savingResourceTitle === resource.id}
+                            className="text-slate-400 hover:bg-white/10 p-1.5 rounded transition-colors disabled:opacity-50"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2 mb-1">
+                          <p className="text-white text-sm font-medium truncate">{resource.title}</p>
+                          <button
+                            onClick={() => {
+                              setEditingResourceId(resource.id);
+                              setEditingResourceTitle(resource.title);
+                            }}
+                            className="text-slate-500 hover:text-gold transition-colors opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-white/5"
+                            title="Editar nombre"
+                          >
+                            <Edit2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      )}
                       <p className="text-slate-500 text-xs truncate">{resource.subject}</p>
                     </div>
                     <span className={`text-xs px-2.5 py-0.5 rounded-full border flex-shrink-0 ${
