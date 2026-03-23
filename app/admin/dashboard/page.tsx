@@ -28,6 +28,7 @@ import {
   Edit2,
   Check,
   X,
+  Menu,
 } from 'lucide-react';
 
 // ── Types ──────────────────────────────────────────────
@@ -65,6 +66,7 @@ const TOTAL_IMAGES = 43;
 export default function DashboardPage() {
   const router = useRouter();
   const [activeSection, setActiveSection] = useState<ActiveSection>('upload');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Upload form state
   const [title, setTitle] = useState('');
@@ -387,9 +389,31 @@ export default function DashboardPage() {
 
 
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-screen flex flex-col md:flex-row">
+      {/* ── Mobile Header ──────────────────────────────── */}
+      <div className="md:hidden flex items-center justify-between p-4 glass-dark border-b border-white/5 sticky top-0 z-40">
+        <div className="flex items-center gap-3">
+          <img src="/logo.png" alt="Academic Hub Logo" className="h-8 w-auto mr-1" />
+          <div>
+            <p className="text-white font-semibold text-sm leading-tight">Academic Hub</p>
+            <p className="text-gold text-xs opacity-70 leading-tight">Admin Panel</p>
+          </div>
+        </div>
+        <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="text-white p-2 focus:outline-none">
+          {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+        </button>
+      </div>
+
+      {/* ── Mobile Overlay ─────────────────────────────── */}
+      {isMobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-black/60 z-40 md:hidden backdrop-blur-sm" 
+          onClick={() => setIsMobileMenuOpen(false)} 
+        />
+      )}
+
       {/* ── Sidebar ──────────────────────────────────── */}
-      <aside className="w-64 min-h-screen glass-dark border-r border-white/5 flex flex-col">
+      <aside className={`fixed inset-y-0 left-0 z-50 w-64 h-screen glass-dark border-r border-white/5 flex flex-col transition-transform duration-300 ease-in-out md:relative md:h-auto md:translate-x-0 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         {/* Logo */}
         <div className="p-6 border-b border-white/5">
           <div className="flex items-center gap-3">
@@ -407,7 +431,10 @@ export default function DashboardPage() {
             <button
               key={id}
               id={`sidebar-${id}`}
-              onClick={() => setActiveSection(id)}
+              onClick={() => {
+                setActiveSection(id);
+                setIsMobileMenuOpen(false);
+              }}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
                 activeSection === id
                   ? 'glass-gold text-gold'
@@ -440,7 +467,7 @@ export default function DashboardPage() {
       </aside>
 
       {/* ── Main Content ─────────────────────────────── */}
-      <main className="flex-1 overflow-auto p-8">
+      <main className="flex-1 overflow-auto p-4 md:p-8">
         {/* ── UPLOAD SECTION ─── */}
         {activeSection === 'upload' && (
           <div className="max-w-2xl mx-auto">
