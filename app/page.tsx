@@ -620,12 +620,22 @@ export default function HomePage() {
                                 </div>
                                 <div className="flex-1 min-w-0">
                                   <p className="text-white text-sm font-bold">{test.name}</p>
-                                  <span className="text-xs text-purple-400 font-medium">🧠 Quiz Interactivo · 20 preguntas</span>
+                                  <span className="text-xs text-purple-400 font-medium">🧠 Quiz Interactivo</span>
                                 </div>
                               </div>
                               {/* Render quiz inline */}
                               <div className="p-5">
-                                <QuizComponent quizName={test.name} />
+                                {(() => {
+                                  let parsedQs = undefined;
+                                  if (test.link) {
+                                    try {
+                                      parsedQs = JSON.parse(test.link);
+                                    } catch (e) {
+                                      console.error("Error parsing test questions", e);
+                                    }
+                                  }
+                                  return <QuizComponent quizName={test.name} questionsData={parsedQs} />;
+                                })()}
                               </div>
                             </div>
                           ) : (

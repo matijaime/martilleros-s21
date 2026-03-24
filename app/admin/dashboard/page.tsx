@@ -102,6 +102,7 @@ export default function DashboardPage() {
   const [testLink, setTestLink]         = useState('');
   const [testSubject, setTestSubject]   = useState('');
   const [isInternal, setIsInternal]     = useState(false);
+  const [internalJsonStr, setInternalJsonStr] = useState('');
   const [savingTest, setSavingTest]     = useState(false);
   const [testStatus, setTestStatus]     = useState<'idle' | 'success' | 'error'>('idle');
   const [testMessage, setTestMessage]   = useState('');
@@ -321,16 +322,43 @@ export default function DashboardPage() {
       setTestMessage('Completá el nombre y la materia.');
       return;
     }
-    if (!isInternal && !testLink.trim()) {
-      setTestStatus('error');
-      setTestMessage('Ingresá el link del test externo.');
-      return;
+
+    let linkToSave = '';
+
+    if (isInternal) {
+      if (!internalJsonStr.trim()) {
+        setTestStatus('error');
+        setTestMessage('Copiá el JSON con las preguntas.');
+        return;
+      }
+      try {
+        const parsed = JSON.parse(internalJsonStr);
+        if (!Array.isArray(parsed)) throw new Error('El JSON debe ser un array de preguntas.');
+        if (parsed.length === 0) throw new Error('El array no puede estar vacío.');
+        // Opcional: Validar la estructura básica de la primera pregunta para asegurar que sea correcta.
+        if (!('question' in parsed[0] && 'options' in parsed[0] && 'correct' in parsed[0])) {
+          throw new Error('Las preguntas no tienen el formato correcto (question, options, correct).');
+        }
+        linkToSave = JSON.stringify(parsed);
+      } catch (err: any) {
+        setTestStatus('error');
+        setTestMessage(`JSON inválido: ${err.message}`);
+        return;
+      }
+    } else {
+      if (!testLink.trim()) {
+        setTestStatus('error');
+        setTestMessage('Ingresá el link del test externo.');
+        return;
+      }
+      linkToSave = testLink.trim();
     }
+
     setSavingTest(true);
     setTestStatus('idle');
     const { error } = await supabase.from('tests').insert({
       name: testName.trim(),
-      link: isInternal ? '' : testLink.trim(),
+      link: linkToSave,
       subject: testSubject,
       is_internal: isInternal,
     });
@@ -342,6 +370,7 @@ export default function DashboardPage() {
       setTestMessage(`"${testName}" guardado correctamente.`);
       setTestName('');
       setTestLink('');
+      setInternalJsonStr('');
       setTestSubject('');
       setIsInternal(false);
       fetchTests();
@@ -922,13 +951,25 @@ export default function DashboardPage() {
                 </div>
                 {isInternal && (
                   <p className="text-xs text-purple-400/70 mt-2">
-                    Se mostrará el quiz interactivo con 20 preguntas mezcladas automáticamente.
+                    Se mostrará el quiz interactivo. Ahora podés pegar las preguntas directamente en formato JSON.
                   </p>
                 )}
               </div>
 
-              {/* Link (only for external) */}
-              {!isInternal && (
+              {/* Link or JSON Input depending on isInternal */}
+              {isInternal ? (
+                <div>
+                  <label className="block text-purple-400 text-xs mb-2 font-medium uppercase tracking-wide">
+                    JSON DE PREGUNTAS *
+                  </label>
+                  <textarea
+                    value={internalJsonStr}
+                    onChange={e => setInternalJsonStr(e.target.value)}
+                    placeholder="[\n  {\n    &#34;id&#34;: 1,\n    &#34;question&#34;: &#34;Pregunta de ejemplo&#34;,\n    &#34;options&#34;: [&#34;A. Opción 1&#34;, &#34;B. Opción 2&#34;],\n    &#34;correct&#34;: &#34;A&#34;\n  }\n]"
+                    className="input-dark min-h-[160px] font-mono text-xs whitespace-pre"
+                  />
+                </div>
+              ) : (
                 <div>
                   <label className="block text-slate-400 text-xs mb-2 font-medium uppercase tracking-wide">
                     Link del Test (URL) *

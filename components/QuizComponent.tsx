@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { CheckCircle2, XCircle, ChevronRight, RotateCcw, Trophy, AlertCircle } from 'lucide-react';
 
 // ── Types ──────────────────────────────────────────────────────────────────
-interface QuizQuestion {
+export interface QuizQuestion {
   id: number;
   question: string;
   options: string[];
@@ -269,9 +269,11 @@ function getScoreMessage(pct: number): string {
 }
 
 // ── Main Component ────────────────────────────────────────────────────────────
-export default function QuizComponent({ quizName = 'Simulacro — Aprender en el Siglo 21' }: { quizName?: string }) {
+export default function QuizComponent({ quizName = 'Simulacro — Aprender en el Siglo 21', questionsData }: { quizName?: string; questionsData?: QuizQuestion[] }) {
   const [phase, setPhase]       = useState<Phase>('quiz');
-  const [questions, setQuestions] = useState<QuizQuestion[]>(() => shuffle(QUESTIONS));
+  
+  const initialQuestions = questionsData && questionsData.length > 0 ? questionsData : QUESTIONS;
+  const [questions, setQuestions] = useState<QuizQuestion[]>(() => shuffle(initialQuestions));
   const [currentIdx, setCurrentIdx] = useState(0);
   const [answers, setAnswers]   = useState<UserAnswer[]>([]);
   const [selected, setSelected] = useState<string | null>(null);
@@ -309,13 +311,13 @@ export default function QuizComponent({ quizName = 'Simulacro — Aprender en el
   };
 
   const handleRestart = useCallback(() => {
-    setQuestions(shuffle(QUESTIONS));
+    setQuestions(shuffle(initialQuestions));
     setAnswers([]);
     setCurrentIdx(0);
     setSelected(null);
     setConfirmed(false);
     setPhase('quiz');
-  }, []);
+  }, [initialQuestions]);
 
   // ── Results Screen ─────────────────────────────────────────────────────────
   if (phase === 'results') {
@@ -362,7 +364,7 @@ export default function QuizComponent({ quizName = 'Simulacro — Aprender en el
               Preguntas para repasar ({wrong.length})
             </h3>
             {wrong.map((answer, idx) => {
-              const q = QUESTIONS.find(q => q.id === answer.questionId)!;
+              const q = initialQuestions.find(q => q.id === answer.questionId)!;
               const correctOption = q.options.find(o => getLetterFromOption(o) === answer.correct)!;
               const selectedOption = q.options.find(o => getLetterFromOption(o) === answer.selected)!;
               return (
