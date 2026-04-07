@@ -1,6 +1,6 @@
 'use client';
 
-import { ChevronRight, Clock, ShieldAlert, Calendar, BookOpen } from 'lucide-react';
+import { ChevronRight, Clock, ShieldAlert, Calendar, BookOpen, Cloud, FolderOpen, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -86,6 +86,56 @@ export default function HomePage() {
                 </Link>
               );
             })}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Biblioteca Virtual ────────────────────────── */}
+      <section className="pb-8 px-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="relative glass rounded-2xl border border-gold/20 overflow-hidden bg-gradient-to-r from-gold/8 via-transparent to-blue-500/5">
+            {/* Glow FX */}
+            <div className="absolute -top-20 -left-20 w-64 h-64 bg-gold/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute -bottom-10 -right-10 w-48 h-48 bg-blue-500/8 rounded-full blur-3xl pointer-events-none" />
+
+            <div className="relative z-10 flex flex-col md:flex-row items-center gap-6 p-8 md:p-10">
+              {/* Icon */}
+              <div className="w-16 h-16 rounded-2xl glass-gold flex items-center justify-center flex-shrink-0">
+                <Cloud className="w-8 h-8 text-gold" />
+              </div>
+
+              {/* Text */}
+              <div className="flex-1 text-center md:text-left">
+                <div className="inline-flex items-center gap-2 mb-2">
+                  <div className="w-1.5 h-1.5 bg-gold rounded-full animate-pulse" />
+                  <span className="text-gold text-xs font-semibold uppercase tracking-widest">Nuevo</span>
+                </div>
+                <h2 className="text-white font-bold text-xl md:text-2xl mb-1">Biblioteca Virtual</h2>
+                <p className="text-slate-400 text-sm leading-relaxed max-w-lg">
+                  Accedé a toda la nube de apuntes, resúmenes, TPs y bibliografía organizada por materia. Más de 100 archivos listos para estudiar.
+                </p>
+              </div>
+
+              {/* CTAs */}
+              <div className="flex flex-col sm:flex-row gap-3 flex-shrink-0">
+                <a
+                  href="https://drive.google.com/drive/folders/1YIFMARdYRsU5mHfeDN3NB4jw9jGHzdCa"
+                  target="_blank" rel="noopener noreferrer"
+                  className="flex items-center gap-2 bg-gold/10 hover:bg-gold/20 text-gold border border-gold/25 text-sm font-semibold px-5 py-2.5 rounded-xl transition-all"
+                >
+                  <FolderOpen className="w-4 h-4" />
+                  Abrir Drive
+                  <ExternalLink className="w-3.5 h-3.5 opacity-60" />
+                </a>
+                <Link
+                  href="/biblioteca"
+                  className="flex items-center gap-2 btn-gold text-sm px-5 py-2.5"
+                >
+                  Ver Biblioteca
+                  <ChevronRight className="w-4 h-4" />
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
       </section>
