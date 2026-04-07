@@ -1,6 +1,6 @@
 'use client';
 
-import { Bell, X, MessageCircle, Cloud } from 'lucide-react';
+import { Bell, X, MessageCircle, Cloud, Users } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabaseClient';
@@ -57,6 +57,10 @@ export default function Navbar() {
             <Link href="/biblioteca" className="flex items-center gap-1 hover:text-gold transition-colors">
               <Cloud className="w-3.5 h-3.5" />
               Biblioteca
+            </Link>
+            <Link href="/grupos" className="flex items-center gap-1 hover:text-gold transition-colors">
+              <Users className="w-3.5 h-3.5" />
+              Grupos
             </Link>
             <a
               href={WA_COMMUNITY}

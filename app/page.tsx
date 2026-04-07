@@ -1,6 +1,6 @@
 'use client';
 
-import { ChevronRight, Clock, ShieldAlert, Calendar, BookOpen, Cloud, FolderOpen, ExternalLink } from 'lucide-react';
+import { ChevronRight, Clock, ShieldAlert, Calendar, BookOpen, Cloud, FolderOpen, ExternalLink, Users, MessageCircle } from 'lucide-react';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -135,6 +135,46 @@ export default function HomePage() {
                   <ChevronRight className="w-4 h-4" />
                 </Link>
               </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Grupos de WhatsApp ────────────────────────── */}
+      <section className="pb-8 px-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="relative glass rounded-2xl border border-green-500/20 overflow-hidden bg-gradient-to-r from-green-500/8 via-transparent to-emerald-500/5">
+            {/* Glow FX */}
+            <div className="absolute -top-20 -left-20 w-64 h-64 bg-green-500/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute -bottom-10 -right-10 w-48 h-48 bg-emerald-500/8 rounded-full blur-3xl pointer-events-none" />
+
+            <div className="relative z-10 flex flex-col md:flex-row items-center gap-6 p-8 md:p-10">
+              {/* Icon */}
+              <div className="w-16 h-16 rounded-2xl bg-green-500/10 border border-green-500/20 flex items-center justify-center flex-shrink-0">
+                <Users className="w-8 h-8 text-green-400" />
+              </div>
+
+              {/* Text */}
+              <div className="flex-1 text-center md:text-left">
+                <div className="inline-flex items-center gap-2 mb-2">
+                  <div className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse" />
+                  <span className="text-green-400 text-xs font-semibold uppercase tracking-widest">WhatsApp</span>
+                </div>
+                <h2 className="text-white font-bold text-xl md:text-2xl mb-1">Grupos de la Facultad</h2>
+                <p className="text-slate-400 text-sm leading-relaxed max-w-lg">
+                  Todos los links de los grupos de WhatsApp de cada materia, organizados por cuatrimestre. Conectá con tus compañeros.
+                </p>
+              </div>
+
+              {/* CTA */}
+              <Link
+                href="/grupos"
+                className="flex items-center gap-2 bg-green-500/15 hover:bg-green-500/25 text-green-400 border border-green-500/25 text-sm font-semibold px-6 py-2.5 rounded-xl transition-all flex-shrink-0"
+              >
+                <MessageCircle className="w-4 h-4" />
+                Ver Grupos
+                <ChevronRight className="w-4 h-4" />
+              </Link>
             </div>
           </div>
         </div>
